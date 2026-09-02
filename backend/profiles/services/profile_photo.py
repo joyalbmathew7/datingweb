@@ -43,6 +43,7 @@ class ProfilePhotoService:
             image=image,
             is_profile_picture=is_profile_picture,
             is_cover_photo=is_cover_photo,
+            is_approved=True,
         )
 
     @staticmethod

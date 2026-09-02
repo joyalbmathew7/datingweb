@@ -12,6 +12,7 @@ class DiscoveryView(generics.ListAPIView):
     def get_queryset(self):
 
         filters = {
+            "search": self.request.query_params.get("search"),
             "gender": self.request.query_params.get("gender"),
             "interested_in": self.request.query_params.get(
                 "interested_in"

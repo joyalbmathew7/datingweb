@@ -20,7 +20,10 @@ path(
     include("interactions.urls"),
 ),
 path("api/v1/matches/", include("matches.urls")),
-path("api/v1/chats/",include("chats.urls"))
+path("api/v1/chats/", include("chats.urls")),
+path("api/v1/notifications/", include("notifications.urls")),
+    path("api/v1/locations/", include("locations.urls")),
+    
 ]
 
 urlpatterns += static(

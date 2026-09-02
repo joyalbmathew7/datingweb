@@ -7,3 +7,4 @@ from .upload_photo import UploadPhotoView
 from .delete_photo import DeletePhotoView
 from .set_profile_picture import SetProfilePictureView
 from .discover_profiles import DiscoverProfilesView
+from .profile_detail import ProfileDetailView

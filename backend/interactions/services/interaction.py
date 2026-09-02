@@ -3,6 +3,8 @@ from rest_framework.exceptions import ValidationError
 from interactions.models import Interaction, Match
 from profiles.services.profile import ProfileService
 from chats.models import Conversation
+from notifications.models import Notification
+from notifications.services import create_notification
 
 class InteractionService:
 
@@ -57,6 +59,12 @@ class InteractionService:
                 "action": action,
             },
         )
+        if action == Interaction.LIKE and created:
+            create_notification(
+                recipient=target_profile,
+                actor=from_profile,
+                notification_type=Notification.LIKE,
+            )
 
         # Check for a mutual like
         if action == Interaction.LIKE:

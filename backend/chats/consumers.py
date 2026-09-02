@@ -14,6 +14,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
 
+        print("[chat] connect start", flush=True)
+
         self.conversation_uuid = (
             self.scope["url_route"]["kwargs"]["uuid"]
         )
@@ -26,13 +28,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
         user = await self.get_user_from_token()
 
         if user is None:
+            print("[chat] connect rejected: invalid or missing token", flush=True)
             await self.close()
             return
+
+        print(f"[chat] authenticated user id={user.id}", flush=True)
 
         # Get user's profile
         self.profile = await self.get_profile(user)
 
         if self.profile is None:
+            print("[chat] connect rejected: profile not found", flush=True)
             await self.close()
             return
 
@@ -40,6 +46,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         conversation = await self.get_conversation()
 
         if conversation is None:
+            print("[chat] connect rejected: conversation not found", flush=True)
             await self.close()
             return
 
@@ -47,6 +54,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not await self.can_access_conversation(
             conversation
         ):
+            print("[chat] connect rejected: conversation access denied", flush=True)
             await self.close()
             return
 
@@ -57,6 +65,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
         await self.accept()
+        print(
+            f"[chat] connect accepted conversation={self.conversation_uuid} "
+            f"profile={self.profile.uuid}",
+            flush=True,
+        )
 
     async def disconnect(self, close_code):
 
@@ -67,20 +80,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
 
+        print(f"[chat] receive raw={text_data!r}", flush=True)
+
         data = json.loads(text_data)
 
         content = data.get("content", "").strip()
 
+        print(f"[chat] receive content={content!r}", flush=True)
+
         if not content:
+            print("[chat] receive ignored: empty content", flush=True)
             return
 
         conversation = await self.get_conversation()
 
         if conversation is None:
+            print("[chat] receive stopped: conversation not found", flush=True)
             return
 
         # Check block
         if await self.is_blocked(conversation):
+
+            print("[chat] receive blocked", flush=True)
 
             await self.send(
                 text_data=json.dumps({
@@ -101,6 +122,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             content,
         )
 
+        print(
+            f"[chat] message created uuid={message.uuid} "
+            f"conversation={conversation.uuid}",
+            flush=True,
+        )
+
         # Send message to everyone in this conversation
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -119,8 +146,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 ),
             },
         )
+        print(
+            f"[chat] group_send completed group={self.room_group_name} "
+            f"message={message.uuid}",
+            flush=True,
+        )
 
     async def chat_message(self, event):
+
+        print(f"[chat] chat_message handler event={event!r}", flush=True)
 
         await self.send(
             text_data=json.dumps({
@@ -131,6 +165,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 "created_at": event["created_at"],
             })
         )
+        print(f"[chat] WebSocket response sent uuid={event['uuid']}", flush=True)
 
     # -------------------------
     # JWT

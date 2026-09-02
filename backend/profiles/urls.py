@@ -1,7 +1,7 @@
 from django.urls import path
 
 # from .views import CreateProfileView
-from profiles.views import CreateProfileView,MyProfileView,UpdateProfileView,UploadPhotoView,DeletePhotoView,SetProfilePictureView,DiscoverProfilesView
+from profiles.views import CreateProfileView,MyProfileView,UpdateProfileView,UploadPhotoView,DeletePhotoView,SetProfilePictureView,DiscoverProfilesView,ProfileDetailView
 
 urlpatterns = [
     path(
@@ -36,5 +36,10 @@ path(
     SetProfilePictureView.as_view(),
     name="set-profile-picture",
 ),
-path("discover/",DiscoverProfilesView.as_view(),name="discover-profiles")
+path("discover/",DiscoverProfilesView.as_view(),name="discover-profiles"),
+path(
+    "<uuid:uuid>/",
+    ProfileDetailView.as_view(),
+    name="profile-detail",
+),
 ]

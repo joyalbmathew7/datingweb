@@ -17,11 +17,17 @@ class UploadPhotoView(generics.CreateAPIView):
         FormParser,
     ]
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-
-        context["profile"] = ProfileService.get_my_profile(
+    def perform_create(self, serializer):
+        profile = ProfileService.get_my_profile(
             self.request.user
         )
 
-        return context
+        print("PROFILE:", profile)
+        print("PROFILE ID:", profile.id)
+
+        serializer.save(profile=profile)
+    def post(self, request, *args, **kwargs):
+        print("SERIALIZER:", self.get_serializer_class())
+        print("SERIALIZER MODULE:", self.get_serializer_class().__module__)
+
+        return super().post(request, *args, **kwargs)

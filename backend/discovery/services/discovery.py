@@ -1,4 +1,4 @@
-from django.db.models import Case, IntegerField, Value, When
+from django.db.models import Case, IntegerField, Q, Value, When
 
 from interactions.models import Interaction, Match
 from profiles.models import Profile
@@ -24,6 +24,16 @@ class DiscoveryService:
         # -------------------------
 
         if filters:
+
+            if filters.get("search"):
+                search = filters["search"].strip()
+                queryset = queryset.filter(
+                    Q(display_name__icontains=search)
+                    | Q(bio__icontains=search)
+                    | Q(city__name__icontains=search)
+                    | Q(state__name__icontains=search)
+                    | Q(country__name__icontains=search)
+                )
 
             if filters.get("gender"):
                 queryset = queryset.filter(
@@ -60,17 +70,19 @@ class DiscoveryService:
         # -------------------------
         # REMOVE ALREADY INTERACTED
         # -------------------------
+        if not (filters and filters.get("search")):
+            interacted_profile_ids = Interaction.objects.filter(
+                from_profile=profile,
+            ).values_list(
+                "to_profile_id",
+                flat=True,
+            )
 
-        interacted_profile_ids = Interaction.objects.filter(
-            from_profile=profile,
-        ).values_list(
-            "to_profile_id",
-            flat=True,
-        )
+            queryset = queryset.exclude(
+                id__in=interacted_profile_ids
+            )
 
-        queryset = queryset.exclude(
-            id__in=interacted_profile_ids
-        )
+
 
         # -------------------------
         # REMOVE ALREADY MATCHED
@@ -96,7 +108,7 @@ class DiscoveryService:
             id__in=matched_profile_ids
         )
 
-        # -------------------------
+        # -------------------------A
         # LOCATION PRIORITY
         # -------------------------
 
@@ -119,3 +131,5 @@ class DiscoveryService:
         )
 
         return queryset
+
+

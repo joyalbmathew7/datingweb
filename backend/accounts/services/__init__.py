@@ -3,6 +3,7 @@ from .jwt import JWTService
 from .password import PasswordService
 from .registration import RegistrationService
 from .verification import VerificationService
+from .otp import OTPService
 
 __all__ = [
     "RegistrationService",

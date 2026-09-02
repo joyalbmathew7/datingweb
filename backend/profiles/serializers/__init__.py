@@ -5,3 +5,4 @@ from .profile_detail import ProfileDetailSerializer
 
 from .profile_photo import ProfilePhotoSerializer
 from .discover_profile import DiscoverProfileSerializer
+from .profile_detail import ProfilePhotoSerializer,ProfileDetailSerializer

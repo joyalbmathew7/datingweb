@@ -29,10 +29,24 @@ class MatchSerializer(serializers.ModelSerializer):
         else:
             other_profile = obj.profile_one
 
+        photo = (
+            other_profile.photos.filter(is_profile_picture=True).first()
+            or other_profile.photos.first()
+        )
+        image = None
+        if photo:
+            request = self.context.get("request")
+            image = (
+                request.build_absolute_uri(photo.image.url)
+                if request
+                else photo.image.url
+            )
+
         return {
             "uuid": str(other_profile.uuid),
             "display_name": other_profile.display_name,
             "bio": other_profile.bio,
             "gender": other_profile.gender,
             "relationship_status": other_profile.relationship_status,
+            "photo": image,
         }
